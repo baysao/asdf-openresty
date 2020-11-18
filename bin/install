@@ -12,36 +12,39 @@ _install(){
 	version1=$(echo $version | sed 's/^v//')
 	local install_path=$3
 	tmpd=$(mktemp -d)
+	dir=$ASDF_DIR/plugins/openresty/bin
 	cd $tmpd
-        dist_code=bionic
-        curl -skL https://raw.githubusercontent.com/openresty/docker-openresty/master/${dist_code}/Dockerfile -o Docker_openresty
+	cp $dir/modules.sh $tmpd
+	sed "s/_RESTY_VERSION/$version1/" $dir/openresty.sh > build.sh
+	sed "s/_PREFIX/$(echo $install_path | sed 's/\//\\\//g')/g" -i build.sh
+	sed "s/_DIR/$(echo $dir | sed 's/\//\\\//g')/g" -i build.sh
+	sed "s/_MODULE/none/g" -i build.sh
+	#cp build.sh $dir/build.sh
+	bash -x build.sh
+        #dist_code=bionic
+        #curl -skL https://raw.githubusercontent.com/openresty/docker-openresty/master/${dist_code}/Dockerfile -o Docker_openresty
 
-	curl -skL https://raw.githubusercontent.com/baysao/asdf-ffmpeg/master/bin/docker2sh.sh -o docker2sh.sh
-        bash ./docker2sh.sh Docker_openresty openresty.sh
-	sed '/export RESTY_J=/a export RESTY_J=\$(nproc)' openresty.sh -i
-	sed "/export RESTY_VERSION=/a export RESTY_VERSION=\"$version1\"" openresty.sh -i
+        #bash $dir/docker2sh.sh Docker_openresty openresty.sh
+	#sed '/export RESTY_J=/a export RESTY_J=\$(nproc)' openresty.sh -i
+	#sed "/export RESTY_VERSION=/a export RESTY_VERSION=\"$version1\"" openresty.sh -i
 
-        sed 's/-I\/usr\/local\/openresty\/openssl\/include/-I\/usr\/local\/openresty\/openssl\/include -O2 -DTCP_FASTOPEN=23/' openresty.sh -i
-#        sed "s/eval \.\/configure/bash -x \/app\/build\/modules\.sh \/tmp\/openresty-\$\{RESTY_VERSION\} $_module/" openresty.sh -i
+        #sed 's/-I\/usr\/local\/openresty\/openssl\/include/-I\/usr\/local\/openresty\/openssl\/include -O2 -DTCP_FASTOPEN=23/' openresty.sh -i
+	#sed "s/eval \.\/configure/bash -x modules\.sh \/tmp\/openresty-\$\{RESTY_VERSION\} $_module/" openresty.sh -i
 #        sed 's/\/tmp/\/app\/build\/install/g' openresty.sh -i
 #        sed 's/\/usr\/local\/openresty/\/app\/bin\/openresty/g' openresty.sh -i
         #sed 's/rm -rf/echo rm -rf/g' openresty.sh -i
-        sed 's/-fSL/-kfSL/g' openresty.sh -i
+        #sed 's/-fSL/-kfSL/g' openresty.sh -i
 
         #sed 's/apt-get/echo apt-get/g' openresty.sh -i
         #sed 's/cp /echo cp /g' openresty.sh -i
-        sed 's/ln -sf/echo ln -sf/g' openresty.sh -i
+        #sed 's/ln -sf/echo ln -sf/g' openresty.sh -i
 
-	cat openresty.sh
-        bash -x openresty.sh
-	mv /usr/local/openresty/* $install_path/
-cat <<EOF > /etc/ld.so.conf.d/openresty.conf
-$install_path/luajit/lib
-$install_path/pcre/lib
-$install_path/openssl/lib
-EOF
-	rm -rf /tmp/openresty
-	rm -rf $tmpd
+	#cat openresty.sh
+	#cp openresty.sh $dir/openresty.sh
+	
+        #bash -x openresty.sh
+	#mv /usr/local/openresty/* $install_path/
+	rm -rf $tmpd /tmp/openresty
 }
 
 _install $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
