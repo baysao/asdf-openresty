@@ -1,5 +1,5 @@
 #!/bin/bash
-#echo "$0 $@" >/app/build/_build/module.sh
+echo "$0 $@" >/tmp/module.sh
 NPS_VERSION=1.13.35.2-stable
 DEBIAN_FRONTEND=noninteractive
 dir=$1
@@ -8,8 +8,15 @@ module=$3
 
 shift 3
 add_dynamic_module=""
+_lib_jasson(){
+	cd $dir
+	rm -rf jansson	
+	git clone https://github.com/akheron/jansson.git
+	cd jansson; autoreconf -i; ./configure; make install
+}
 _lib_maxmind() {
 	cd $dir
+	rm -rf libmaxminddb
 	git clone --recursive https://github.com/maxmind/libmaxminddb
 	cd libmaxminddb
 	./bootstrap
@@ -18,6 +25,7 @@ _lib_maxmind() {
 }
 _lib_lmdb() {
 	cd $dir
+	rm -rf lmdb
 	if [ ! -d "lmdb" ]; then git clone https://github.com/LMDB/lmdb.git; fi
 	cd lmdb/libraries/liblmdb/
 	git pull origin master
@@ -27,6 +35,7 @@ _lib_lmdb() {
 }
 _lib_sregex() {
         cd $dir
+	rm -rf sregex
         if [ ! -d "sregex" ]; then
                 git clone https://github.com/openresty/sregex.git
         fi
@@ -37,6 +46,7 @@ _lib_sregex() {
 
 _lib_hyperscan() {
 	cd $dir
+	rm -rf hyperscan
 	if [ ! -d "hyperscan" ]; then
 		git clone https://github.com/intel/hyperscan.git
 	fi
@@ -47,6 +57,7 @@ _lib_hyperscan() {
 }
 _lib_cidr() {
 	cd $dir
+	rm -rf libcidr-1.2.3
 	curl -skLO https://www.over-yonder.net/~fullermd/projects/libcidr/libcidr-1.2.3.tar.xz
 	tar -xJf libcidr-1.2.3.tar.xz
 	cd libcidr-1.2.3
@@ -54,6 +65,7 @@ _lib_cidr() {
 }
 _lib_pcre(){
 	cd $dir
+	rm -rf pcre-8.44
 	curl -skLO https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz
 	tar xvzf pcre-8.44.tar.gz
 	cd pcre-8.44
@@ -61,6 +73,7 @@ _lib_pcre(){
 }
 _lib_jwt() {
 	cd $dir
+	rm -rf libjwt-1.10.2
 	curl -skLO https://github.com/benmcollins/libjwt/archive/v1.10.2.tar.gz
 	tar xvzf v1.10.2.tar.gz
 	cd libjwt-1.10.2
@@ -70,6 +83,7 @@ _lib_jwt() {
 }
 _lib_xtea() {
 	cd $dir
+	rm -rf  xxtea-c
 	if [ ! -d "xxtea-c" ]; then git clone https://github.com/xxtea/xxtea-c.git; fi
 	cd xxtea-c
 	cmake .
@@ -77,9 +91,11 @@ _lib_xtea() {
 }
 _lib_gd() {
 cd $dir
+rm -rf libimagequant
 git clone https://github.com/ImageOptim/libimagequant.git
 cd libimagequant
 ./configure ; make libimagequant;make install
+rm -rf libgd
 git clone https://github.com/libgd/libgd.git
 cd libgd
 ./configure
@@ -87,6 +103,7 @@ make install
 }
 _lib_small_light() {
 	cd $dir
+	rm -rf ngx_small_light
 	if [ ! -d "ngx_small_light" ]; then git clone https://github.com/cubicdaiya/ngx_small_light.git; fi
 	cd ngx_small_light
 	git pull origin master
@@ -94,6 +111,7 @@ _lib_small_light() {
 }
 _lib_ssdeep() {
 	cd $dir
+	rm -rf ssdeep
 	if [ ! -d "ssdeep" ]; then git clone https://github.com/ssdeep-project/ssdeep.git; fi
 	cd ssdeep
 	git pull origin master
@@ -103,12 +121,14 @@ _lib_ssdeep() {
 }
 _lib_injection(){
  	cd $dir
+	rm -rf libinjection
 	git clone https://github.com/client9/libinjection.git
 	cd libinjection; make install
 	install src/libinjection.so /usr/local/lib
 }
 _ngx_brotli(){
 	cd $dir
+	rm -rf ngx_brotli
 	git clone https://github.com/google/ngx_brotli.git
 	cd ngx_brotli
 	git submodule update --init
@@ -117,9 +137,8 @@ _ngx_modsecurity() {
 	_lib_lmdb
 	_lib_maxmind
 	cd $dir
-	if [ ! -d "ModSecurity" ]; then
-		git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity
-	fi
+	rm -rf ModSecurity
+	git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity
 	cd ModSecurity
 	git pull origin v3/master
 	git submodule init
@@ -129,6 +148,7 @@ _ngx_modsecurity() {
 	make -j$(nproc) install
 }
 _dependencies() {
+	_lib_jasson
 	_lib_injection
 	_lib_lmdb
 	_lib_sregex
@@ -176,13 +196,16 @@ _module() {
 	#	_$module
 }
 _pagespeed() {
+
+	apt install -y wget uuid-dev
 	#if [ ! -d "$dir/pagespeed" ];then
 	cd $dir
 	echo "$dir/pagespeed/incubator-pagespeed-ngx-$NPS_VERSION"
 	#if [ ! -d "$dir/pagespeed/incubator-pagespeed-ngx-$NPS_VERSION" ]; then
+	rm -rf $dir/pagespeed
 	mkdir -p $dir/pagespeed
 	cd $dir/pagespeed
-	wget -c https://github.com/apache/incubator-pagespeed-ngx/archive/v${NPS_VERSION}.zip
+	wget -c  https://github.com/apache/incubator-pagespeed-ngx/archive/v${NPS_VERSION}.zip
 	unzip v${NPS_VERSION}.zip
 	nps_dir=$(find . -name "*pagespeed-ngx-${NPS_VERSION}" -type d)
 	cd "$nps_dir"
@@ -229,7 +252,9 @@ urls1="\
 	https://github.com/baysao/ngx_http_twaf_variables.git \
 	https://github.com/baysao/nginx-eval-module.git \
 "
-	if [ "$module" = "all" ]; then
+	if [ "$module" = "pagespeed" ]; then
+		_pagespeed
+	elif [ "$module" = "all" ]; then
 		_dependencies
 		_pagespeed
 		for _url in $urls; do _module $_url; done
