@@ -61,8 +61,8 @@ export RESTY_EVAL_POST_MAKE=""
 
 # These are not intended to be user-specified
 export _RESTY_CONFIG_DEPS="--with-pcre \
-    --with-cc-opt='-DNGX_LUA_ABORT_AT_PANIC -I/usr/local/openresty/pcre/include -I/usr/local/openresty/openssl/include -O2 -DTCP_FASTOPEN=23' \
-    --with-ld-opt='-L/usr/local/openresty/pcre/lib -L/usr/local/openresty/openssl/lib -Wl,-rpath,/usr/local/openresty/pcre/lib:/usr/local/openresty/openssl/lib' \
+    --with-cc-opt='-DNGX_LUA_ABORT_AT_PANIC -I/root/.asdf/installs/ffmpeg/snapshot/include -I/usr/local/openresty/pcre/include -I/usr/local/openresty/openssl/include -O2 -DTCP_FASTOPEN=23' \
+    --with-ld-opt='-L/root/.asdf/installs/ffmpeg/snapshot/lib -L/usr/local/openresty/pcre/lib -L/usr/local/openresty/openssl/lib -Wl,-rpath,/usr/local/openresty/pcre/lib:/usr/local/openresty/openssl/lib' \
     "
 
 export resty_image_base="${RESTY_IMAGE_BASE}"

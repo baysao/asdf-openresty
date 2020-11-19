@@ -157,7 +157,7 @@ _dependencies() {
 	_lib_xtea
 	_lib_ssdeep
 	_ngx_modsecurity
-	_lib_small_light
+	#_lib_small_light
 }
 
 _module() {

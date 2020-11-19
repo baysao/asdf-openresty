@@ -25,12 +25,12 @@ ldconfig
 	sed "s/_RESTY_VERSION/$version1/" $dir/openresty.sh > build.sh
 	sed "s/_PREFIX/$(echo $install_path | sed 's/\//\\\//g')/g" -i build.sh
 	sed "s/_DIR/$(echo $dir | sed 's/\//\\\//g')/g" -i build.sh
-	sed "s/_MODULE/none/g" -i build.sh
+	sed "s/_MODULE/all/g" -i build.sh
 	cp $tmpd/build.sh $dir/build.sh
 	bash -x build.sh
-	#mv /usr/local/openresty/* $install_path/
-	
-	rm -rf $tmpd 
+	mv /usr/local/openresty/* $install_path/
+	cp -rf /usr/local/* $ASDF_DIR/installs/local
+	rm -rf $tmpd /tmp/*
 }
 
 _install $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
