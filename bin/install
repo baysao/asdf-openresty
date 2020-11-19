@@ -13,6 +13,12 @@ _install(){
 	local install_path=$3
 	tmpd=$(mktemp -d)
 	dir=$ASDF_DIR/plugins/openresty/bin
+cat <<EOF > $install_path/lib.conf
+$install_path/openssl/lib 
+$install_path/pcre/lib 
+$install_path/luajit/lib
+EOF
+cp $install_path/lib.conf /etc/ld.so.conf.d/openresty.conf
 	cd $tmpd
 	cp $dir/modules.sh $tmpd
 	sed "s/_RESTY_VERSION/$version1/" $dir/openresty.sh > build.sh
@@ -43,7 +49,8 @@ _install(){
 	#cp openresty.sh $dir/openresty.sh
 	
         #bash -x openresty.sh
-	#mv /usr/local/openresty/* $install_path/
+	mv /usr/local/openresty/* $install_path/
+	
 	rm -rf $tmpd /tmp/openresty
 }
 

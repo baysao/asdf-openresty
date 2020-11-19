@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-echo -n "bin sbin nginx/sbin"
+echo -n "luajit/bin bin nginx/sbin"
