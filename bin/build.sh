@@ -1,4 +1,4 @@
-export HOME/root/.asdf/plugins/openresty/binECTORY=/
+#export HOME/root/.asdf/plugins/openresty/binRY=/
 # Dockerfile - Ubuntu Bionic
 # https://github.com/openresty/docker-openresty
 
@@ -122,6 +122,8 @@ echo RUN;DEBIAN_FRONTEND=noninteractive apt-get update \
       -Wl,-rpath,/usr/local/openresty/openssl/lib \
     && make -j${RESTY_J} \
     && make -j${RESTY_J} install_sw \
+    && mkdir -p /usr/local/openresty/openssl/ssl
+	&& cp apps/openssl.cnf /usr/local/openresty/openssl/ssl/
     && cd /tmp \
     && curl -kfSL https://ftp.pcre.org/pub/pcre/pcre-${RESTY_PCRE_VERSION}.tar.gz -o pcre-${RESTY_PCRE_VERSION}.tar.gz \
     && tar xzf pcre-${RESTY_PCRE_VERSION}.tar.gz \
@@ -184,8 +186,8 @@ export LUA_PATH="/usr/local/openresty/site/lualib/?.ljbc;/usr/local/openresty/si
 export LUA_CPATH="/usr/local/openresty/site/lualib/?.so;/usr/local/openresty/lualib/?.so;./?.so;/usr/local/lib/lua/5.1/?.so;/usr/local/openresty/luajit/lib/lua/5.1/?.so;/usr/local/lib/lua/5.1/loadall.so;/usr/local/openresty/luajit/lib/lua/5.1/?.so"
 
 # Copy nginx configuration files
-cd $HOME/root/.asdf/plugins/openresty/binECTORY; cp nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
-cd $HOME/root/.asdf/plugins/openresty/binECTORY; cp nginx.vh.default.conf /etc/nginx/conf.d/default.conf
+#cd $HOME/root/.asdf/plugins/openresty/binECTORY; cp nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
+#cd $HOME/root/.asdf/plugins/openresty/binECTORY; cp nginx.vh.default.conf /etc/nginx/conf.d/default.conf
 
 #CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
 
@@ -194,4 +196,5 @@ cd $HOME/root/.asdf/plugins/openresty/binECTORY; cp nginx.vh.default.conf /etc/n
 #STOPSIGNAL SIGQUIT
 }
 _init
-_openresty /root/.asdf/plugins/openresty/bin /root/.asdf/installs/openresty/v1.19.3.1 all
+_openresty /root/.asdf/plugins/openresty/bin /root/.asdf/installs/openresty/v1.19.3.1 none
+#_openresty /root/.asdf/plugins/openresty/bin /root/.asdf/installs/openresty/v1.19.3.1 all
