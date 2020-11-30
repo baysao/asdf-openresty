@@ -122,8 +122,8 @@ echo RUN;DEBIAN_FRONTEND=noninteractive apt-get update \
       -Wl,-rpath,/usr/local/openresty/openssl/lib \
     && make -j${RESTY_J} \
     && make -j${RESTY_J} install_sw \
-    && mkdir -p /usr/local/openresty/openssl/ssl
-	&& cp apps/openssl.cnf /usr/local/openresty/openssl/ssl/
+    && mkdir -p /usr/local/openresty/openssl/ssl \
+	&& cp apps/openssl.cnf /usr/local/openresty/openssl/ssl/ \
     && cd /tmp \
     && curl -kfSL https://ftp.pcre.org/pub/pcre/pcre-${RESTY_PCRE_VERSION}.tar.gz -o pcre-${RESTY_PCRE_VERSION}.tar.gz \
     && tar xzf pcre-${RESTY_PCRE_VERSION}.tar.gz \
