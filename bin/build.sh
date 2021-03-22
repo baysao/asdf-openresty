@@ -154,7 +154,10 @@ echo RUN;DEBIAN_FRONTEND=noninteractive apt-get update \
     && rm -rf \
         openssl-${RESTY_OPENSSL_VERSION}.tar.gz openssl-${RESTY_OPENSSL_VERSION} \
         pcre-${RESTY_PCRE_VERSION}.tar.gz pcre-${RESTY_PCRE_VERSION} \
-        openresty-${RESTY_VERSION}.tar.gz openresty-${RESTY_VERSION} \
+        openresty-${RESTY_VERSION}.tar.gz openresty-${RESTY_VERSION} 
+}
+_luarocks(){
+     cd /tmp \
     && curl -kfSL https://luarocks.github.io/luarocks/releases/luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz -o luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
     && tar xzf luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
     && cd luarocks-${RESTY_LUAROCKS_VERSION} \
@@ -164,8 +167,10 @@ echo RUN;DEBIAN_FRONTEND=noninteractive apt-get update \
         --lua-suffix=jit-2.1.0-beta3 \
         --with-lua-include=/usr/local/openresty/luajit/include/luajit-2.1 \
     && make build \
-    && make install \
-    && cd /tmp \
+    && make install 
+}
+_clean1(){
+    cd /tmp \
     && if [ -n "${RESTY_EVAL_POST_MAKE}" ]; then eval $(echo ${RESTY_EVAL_POST_MAKE}); fi \
     && rm -rf luarocks-${RESTY_LUAROCKS_VERSION} luarocks-${RESTY_LUAROCKS_VERSION}.tar.gz \
     && if [ -n "${RESTY_ADD_PACKAGE_BUILDDEPS}" ]; then DEBIAN_FRONTEND=noninteractive apt-get remove -y --purge ${RESTY_ADD_PACKAGE_BUILDDEPS} ; fi \
@@ -197,4 +202,5 @@ export LUA_CPATH="/usr/local/openresty/site/lualib/?.so;/usr/local/openresty/lua
 }
 _init
 _openresty /root/.asdf/plugins/openresty/bin /root/.asdf/installs/openresty/v1.19.3.1 none
+_luarocks
 #_openresty /root/.asdf/plugins/openresty/bin /root/.asdf/installs/openresty/v1.19.3.1 all
