@@ -6,17 +6,22 @@ dir=$1
 prefix=$2
 module=$3
 
+rm="echo rm"
+apt install -y build-essential autoconf libtool wget uuid-dev
 shift 3
 add_dynamic_module=""
-_lib_jasson(){
+_lib_jasson() {
 	cd $dir
-	rm -rf jansson	
+	$rm -rf jansson
 	git clone https://github.com/akheron/jansson.git
-	cd jansson; autoreconf -i; ./configure; make install
+	cd jansson
+	autoreconf -i
+	./configure
+	make install
 }
 _lib_maxmind() {
 	cd $dir
-	rm -rf libmaxminddb
+	$rm -rf libmaxminddb
 	git clone --recursive https://github.com/maxmind/libmaxminddb
 	cd libmaxminddb
 	./bootstrap
@@ -25,7 +30,7 @@ _lib_maxmind() {
 }
 _lib_lmdb() {
 	cd $dir
-	rm -rf lmdb
+	$rm -rf lmdb
 	if [ ! -d "lmdb" ]; then git clone https://github.com/LMDB/lmdb.git; fi
 	cd lmdb/libraries/liblmdb/
 	git pull origin master
@@ -34,19 +39,19 @@ _lib_lmdb() {
 	export LMDB_LIB=/usr/local/lib
 }
 _lib_sregex() {
-        cd $dir
-	rm -rf sregex
-        if [ ! -d "sregex" ]; then
-                git clone https://github.com/openresty/sregex.git
-        fi
-        cd sregex
-        git pull origin master
-        make -j$(nproc) install
+	cd $dir
+	$rm -rf sregex
+	if [ ! -d "sregex" ]; then
+		git clone https://github.com/openresty/sregex.git
+	fi
+	cd sregex
+	git pull origin master
+	make -j$(nproc) install
 }
 
 _lib_hyperscan() {
 	cd $dir
-	rm -rf hyperscan
+	$rm -rf hyperscan
 	if [ ! -d "hyperscan" ]; then
 		git clone https://github.com/intel/hyperscan.git
 	fi
@@ -57,23 +62,24 @@ _lib_hyperscan() {
 }
 _lib_cidr() {
 	cd $dir
-	rm -rf libcidr-1.2.3
+	$rm -rf libcidr-1.2.3
 	curl -skLO https://www.over-yonder.net/~fullermd/projects/libcidr/libcidr-1.2.3.tar.xz
 	tar -xJf libcidr-1.2.3.tar.xz
 	cd libcidr-1.2.3
 	make install
 }
-_lib_pcre(){
+_lib_pcre() {
 	cd $dir
-	rm -rf pcre-8.44
+	$rm -rf pcre-8.44
 	curl -skLO https://ftp.pcre.org/pub/pcre/pcre-8.44.tar.gz
 	tar xvzf pcre-8.44.tar.gz
 	cd pcre-8.44
-	./configure ; make install
+	./configure
+	make install
 }
 _lib_jwt() {
 	cd $dir
-	rm -rf libjwt-1.10.2
+	$rm -rf libjwt-1.10.2
 	curl -skLO https://github.com/benmcollins/libjwt/archive/v1.10.2.tar.gz
 	tar xvzf v1.10.2.tar.gz
 	cd libjwt-1.10.2
@@ -83,27 +89,29 @@ _lib_jwt() {
 }
 _lib_xtea() {
 	cd $dir
-	rm -rf  xxtea-c
+	$rm -rf xxtea-c
 	if [ ! -d "xxtea-c" ]; then git clone https://github.com/xxtea/xxtea-c.git; fi
 	cd xxtea-c
 	cmake .
 	make -j$(nproc) install
 }
 _lib_gd() {
-cd $dir
-rm -rf libimagequant
-git clone https://github.com/ImageOptim/libimagequant.git
-cd libimagequant
-./configure ; make libimagequant;make install
-rm -rf libgd
-git clone https://github.com/libgd/libgd.git
-cd libgd
-./configure
-make install
+	cd $dir
+	$rm -rf libimagequant
+	git clone https://github.com/ImageOptim/libimagequant.git
+	cd libimagequant
+	./configure
+	make libimagequant
+	make install
+	$rm -rf libgd
+	git clone https://github.com/libgd/libgd.git
+	cd libgd
+	./configure
+	make install
 }
 _lib_small_light() {
 	cd $dir
-	rm -rf ngx_small_light
+	$rm -rf ngx_small_light
 	if [ ! -d "ngx_small_light" ]; then git clone https://github.com/cubicdaiya/ngx_small_light.git; fi
 	cd ngx_small_light
 	git pull origin master
@@ -111,7 +119,7 @@ _lib_small_light() {
 }
 _lib_ssdeep() {
 	cd $dir
-	rm -rf ssdeep
+	$rm -rf ssdeep
 	if [ ! -d "ssdeep" ]; then git clone https://github.com/ssdeep-project/ssdeep.git; fi
 	cd ssdeep
 	git pull origin master
@@ -119,16 +127,18 @@ _lib_ssdeep() {
 	./configure
 	make -j$(nproc) install
 }
-_lib_injection(){
- 	cd $dir
-	rm -rf libinjection
+_lib_injection() {
+	cd $dir
+	$rm -rf libinjection
 	git clone https://github.com/client9/libinjection.git
-	cd libinjection; make install
+	cd libinjection
+	make all
+	make install
 	install src/libinjection.so /usr/local/lib
 }
-_ngx_brotli(){
+_ngx_brotli() {
 	cd $dir
-	rm -rf ngx_brotli
+	$rm -rf ngx_brotli
 	git clone https://github.com/google/ngx_brotli.git
 	cd ngx_brotli
 	git submodule update --init
@@ -137,7 +147,7 @@ _ngx_modsecurity() {
 	_lib_lmdb
 	_lib_maxmind
 	cd $dir
-	rm -rf ModSecurity
+	$rm -rf ModSecurity
 	git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity
 	cd ModSecurity
 	git pull origin v3/master
@@ -161,9 +171,9 @@ _dependencies() {
 }
 
 _module() {
-    _url="$1"
-    shift
-    _opt="$@"
+	_url="$1"
+	shift
+	_opt="$@"
 	cd $dir
 	url=$(echo $_url | awk -F'|' '{print $1}')
 	srcdir=$(echo $_url | awk -F'|' '{print $2}')
@@ -182,30 +192,30 @@ _module() {
 	if [ "$module" = "nginx-link-function" ]; then
 		install $dir/nginx-link-function/src/ngx_link_func_module.h /usr/local/include/
 	fi
-	 if [ "$module" = "https://github.com/SpiderLabs/ModSecurity-nginx.git" ]; then
-			_ngx_modsecurity
-	#		_module $module  --with-compat
-	 fi
+	if [ "$module" = "https://github.com/SpiderLabs/ModSecurity-nginx.git" ]; then
+		_ngx_modsecurity
+		#		_module $module  --with-compat
+	fi
 	if [ "$module" = "https://github.com/google/ngx_brotli.git" ]; then
 		_ngx_brotli
 	fi
 	if [ "$module" = "https://github.com/vislee/ngx_http_waf_module.git" ]; then
-			_lib_pcre
-			_lib_hyperscan
+		_lib_pcre
+		_lib_hyperscan
 	fi
 	#	_$module
 }
 _pagespeed() {
 
-	apt install -y wget uuid-dev
+	#	apt install -y wget uuid-dev
 	#if [ ! -d "$dir/pagespeed" ];then
 	cd $dir
 	echo "$dir/pagespeed/incubator-pagespeed-ngx-$NPS_VERSION"
 	#if [ ! -d "$dir/pagespeed/incubator-pagespeed-ngx-$NPS_VERSION" ]; then
-	rm -rf $dir/pagespeed
+	$rm -rf $dir/pagespeed
 	mkdir -p $dir/pagespeed
 	cd $dir/pagespeed
-	wget -c  https://github.com/apache/incubator-pagespeed-ngx/archive/v${NPS_VERSION}.zip
+	wget -c https://github.com/apache/incubator-pagespeed-ngx/archive/v${NPS_VERSION}.zip
 	unzip v${NPS_VERSION}.zip
 	nps_dir=$(find . -name "*pagespeed-ngx-${NPS_VERSION}" -type d)
 	cd "$nps_dir"
@@ -223,7 +233,6 @@ _pagespeed() {
 # eval ./configure --prefix=/app/bin/openresty $@ \
 # 	--add-dynamic-module=$dir/pagespeed/incubator-pagespeed-ngx-$NPS_VERSION \
 # 	$add_dynamic_module
-
 
 urls="\
 	https://github.com/Taymindis/nginx-link-function \
@@ -252,40 +261,39 @@ urls1="\
 	https://github.com/baysao/ngx_http_twaf_variables.git \
 	https://github.com/baysao/nginx-eval-module.git \
 "
-	if [ "$module" = "pagespeed" ]; then
-		_pagespeed
-	elif [ "$module" = "all" ]; then
-		_dependencies
-		_pagespeed
-		for _url in $urls; do _module $_url; done
+if [ "$module" = "pagespeed" ]; then
+	_pagespeed
+elif [ "$module" = "all" ]; then
+	_dependencies
+	_pagespeed
+	for _url in $urls; do _module $_url; done
 	#elif [ "$module" = "https://github.com/vislee/ngx_http_waf_module.git" ]; then
 	#	_lib_pcre
 	#	_lib_hyperscan
 	#	_module $module
-#	elif [ "$module" = "https://github.com/SpiderLabs/ModSecurity-nginx.git" ]; then
-#		_ngx_modsecurity
-#		_module $module  --with-compat
+	#	elif [ "$module" = "https://github.com/SpiderLabs/ModSecurity-nginx.git" ]; then
+	#		_ngx_modsecurity
+	#		_module $module  --with-compat
 	#elif [ "$module" = "twaf" ]; then
-	 #   _module https://github.com/ruslantalpa/lua-upstream-cache-nginx-module.git
-	 #   _module https://github.com/baysao/ngx_http_twaf_variables.git
+	#   _module https://github.com/ruslantalpa/lua-upstream-cache-nginx-module.git
+	#   _module https://github.com/baysao/ngx_http_twaf_variables.git
 	#elif [ "$module" = "vts" ]; then
-        #	_module https://github.com/vozlt/nginx-module-vts.git
-	#	_module https://github.com/vozlt/nginx-module-sts.git --with-stream 
-        #	_module https://github.com/vozlt/nginx-module-stream-sts.git 
-	#elif [ "$module" = "brotli" ]; then
-	#	_ngx_brotli
-	#	_module https://github.com/google/ngx_brotli.git
-	#elif [ "$module" = "pagespeed" ]; then
-	#	_pagespeed
-	elif [ "$module" != "none" ]; then
-		_module $module
-	fi
-
+	#	_module https://github.com/vozlt/nginx-module-vts.git
+	#	_module https://github.com/vozlt/nginx-module-sts.git --with-stream
+	#	_module https://github.com/vozlt/nginx-module-stream-sts.git
+#elif [ "$module" = "brotli" ]; then
+#	_ngx_brotli
+#	_module https://github.com/google/ngx_brotli.git
+#elif [ "$module" = "pagespeed" ]; then
+#	_pagespeed
+elif [ "$module" != "none" ]; then
+	_module $module
+fi
 
 echo $add_dynamic_module
 cd $dir
 echo ./configure --prefix=$prefix $@ \
-     $add_dynamic_module
+	$add_dynamic_module
 sleep 3
 eval ./configure --prefix=$prefix $@ \
 	$add_dynamic_module
