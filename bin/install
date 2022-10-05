@@ -5,32 +5,35 @@ dist_release=1804
 #$(awk -F'=' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
 dist_code=$(awk -F'=' '/DISTRIB_CODE/{print $2}' /etc/lsb-release)
 
-_install(){
+_install() {
 	dir=$PWD
+	dir1=$(echo $dir | sed 's/\//\\\//g')
 	local install_type=$1
 	local version=$2
 	version1=$(echo $version | sed 's/^v//')
 	local install_path=$3
 	tmpd=$(mktemp -d)
 	dir=$ASDF_DIR/plugins/openresty/bin
-cat <<EOF > $install_path/lib.conf
-$install_path/openssl/lib 
-$install_path/pcre/lib 
-$install_path/luajit/lib
-EOF
-cp $install_path/lib.conf /etc/ld.so.conf.d/openresty.conf
-ldconfig
+
+	DISTRO=${DISTRO:-bionic}
+	echo $DIRTRO
 	cd $tmpd
-	cp $dir/modules.sh $tmpd
-	sed "s/_RESTY_VERSION/$version1/" $dir/openresty.sh > build.sh
-	sed "s/_PREFIX/$(echo $install_path | sed 's/\//\\\//g')/g" -i build.sh
-	sed "s/_DIR/$(echo $dir | sed 's/\//\\\//g')/g" -i build.sh
-	sed "s/_MODULE/all/g" -i build.sh
-	cp $tmpd/build.sh $dir/build.sh
-	bash -x build.sh
-	mv /usr/local/openresty/* $install_path/
-	cp -rf /usr/local/* $ASDF_DIR/installs/local
-	rm -rf $tmpd /tmp/*
+	wget --no-check-certificate https://raw.githubusercontent.com/openresty/docker-openresty/master/$DISTRO/Dockerfile -O Dockerfile
+	sh $dir/docker2sh.sh Dockerfile myinstall.sh
+	sed "/export RESTY_VERSION/a export RESTY_VERSION=$version1" -i myinstall.sh
+	sed 's/openresty\/pcre//g' -i myinstall.sh
+	sed 's/openresty\/openssl//g' -i myinstall.sh
+	sed 's/rm -rf/echo rm -rf/g' -i myinstall.sh
+	sed 's/ln -sf/echo ln -sf/g' -i myinstall.sh
+
+	echo sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i myinstall.sh
+	sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i myinstall.sh
+
+	cat myinstall.sh
+	bash -x myinstall.sh
+	# mv /usr/local/openresty/* $install_path/
+	# cp -rf /usr/local/* $ASDF_DIR/installs/local
+	rm -rf $tmpd
 }
 
 _install $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
