@@ -18,8 +18,8 @@ _module() {
 	add_dynamic_module="$add_dynamic_module --add-dynamic-module=$dir/$module/$srcdir"
 	if [ ! -d "$dir/$module" ]; then
 		cd $dir
-		echo git clone $url
-		git clone $url
+		echo $git_clone $_url
+		$git_clone $_url
 	else
 		cd $dir/$module
 		git pull origin master
