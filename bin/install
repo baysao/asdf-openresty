@@ -5,35 +5,63 @@ dist_release=1804
 #$(awk -F'=' '/DISTRIB_RELEASE/{print $2}' /etc/lsb-release)
 dist_code=$(awk -F'=' '/DISTRIB_CODE/{print $2}' /etc/lsb-release)
 
+_apt() {
+	DEBIAN_FRONTEND=noninteractive apt-get update &&
+		DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+			build-essential \
+			ca-certificates \
+			curl \
+			gettext-base \
+			libgd-dev \
+			libgeoip-dev \
+			libncurses5-dev \
+			libperl-dev \
+			libreadline-dev \
+			libxslt1-dev \
+			make \
+			perl \
+			unzip \
+			wget \
+			zlib1g-dev
+}
 _install() {
-	dir=$PWD
+	_apt
+	dir=$ASDF_DIR/plugins/openresty/bin
 	dir1=$(echo $dir | sed 's/\//\\\//g')
 	local install_type=$1
 	local version=$2
 	version1=$(echo $version | sed 's/^v//')
 	local install_path=$3
-	tmpd=$(mktemp -d)
-	dir=$ASDF_DIR/plugins/openresty/bin
 
 	DISTRO=${DISTRO:-bionic}
 	echo $DIRTRO
-	cd $tmpd
-	wget --no-check-certificate https://raw.githubusercontent.com/openresty/docker-openresty/master/$DISTRO/Dockerfile -O Dockerfile
-	sh $dir/docker2sh.sh Dockerfile myinstall.sh
-	sed "/export RESTY_VERSION/a export RESTY_VERSION=$version1" -i myinstall.sh
-	sed 's/openresty\/pcre//g' -i myinstall.sh
-	sed 's/openresty\/openssl//g' -i myinstall.sh
-	sed 's/rm -rf/echo rm -rf/g' -i myinstall.sh
-	sed 's/ln -sf/echo ln -sf/g' -i myinstall.sh
+	wget --no-check-certificate https://raw.githubusercontent.com/openresty/docker-openresty/master/$DISTRO/Dockerfile -O /tmp/Dockerfile
+	myinstall=/tmp/myinstall.sh
+	sh $dir/docker2sh.sh /tmp/Dockerfile $myinstall
+	sed "/export RESTY_VERSION/a export RESTY_VERSION=$version1" -i $myinstall
+	sed 's/openresty\/pcre//g' -i $myinstall
+	sed 's/openresty\/openssl//g' -i $myinstall
+	sed 's/rm -rf/echo rm -rf/g' -i $myinstall
+	sed 's/ln -sf/echo ln -sf/g' -i $myinstall
 
-	echo sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i myinstall.sh
-	sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i myinstall.sh
+	echo sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i $myinstall
+	sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i $myinstall
 
-	cat myinstall.sh
-	bash -x myinstall.sh
-	# mv /usr/local/openresty/* $install_path/
-	# cp -rf /usr/local/* $ASDF_DIR/installs/local
-	rm -rf $tmpd
+	bash -x $myinstall
+	mkdir -p $install_path/bin $install_path/lib $install_path/include
+
+	cp -rf /usr/local/openresty $install_path/
+	cp -rf /usr/local/include/pcre* /usr/local/include/openssl* $install_path/include/
+	cp -rf /usr/local/bin/pcre* /usr/local/bin/c_* /usr/local/bin/openssl* $install_path/bin/
+	cp -rf /usr/local/lib/pkgconfig /usr/local/lib/engine* /usr/local/lib/libssl* /usr/local/lib/libcrypto* /usr/local/lib/libpcre* $install_path/lib/
+	echo "$install_path/lib" >/etc/ld.so.conf.d/0openresty.conf
+	rm -rf /usr/local/share
+	n1=$(find $install_path | wc -l)
+	n2=$(find /usr/local | wc -l)
+	if [ $n1 -eq $n2 ]; then
+		echo "Install successful."
+	fi
+
 }
 
 _install $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
