@@ -1,0 +1,22 @@
+# version: "2"
+services: 
+  openresty:
+    privileged: true
+    restart: unless-stopped
+    image: ubuntu:20.04
+    #image: phusion/baseimage:focal-1.2.0
+    entrypoint: "sleep infinity"
+    volumes:
+      - /massbit/massbitroute/app/src/bin/.asdf:/root/.asdf:rw
+      - .:/tmp/build:rw
+    container_name: openresty 
+  asdf-openresty:
+    privileged: true
+    restart: unless-stopped
+    image: ubuntu:20.04
+    #image: phusion/baseimage:focal-1.2.0
+    entrypoint: "sleep infinity"
+    volumes:
+      - /massbit/massbitroute/app/src/bin/.asdf:/root/.asdf:rw
+      - .:/tmp/build:rw
+    container_name: asdf_openresty

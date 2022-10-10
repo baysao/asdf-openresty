@@ -33,5 +33,7 @@ done
 
 cd $dir
 
+echo ./configure $@ $add_dynamic_module
+sleep 10
 eval ./configure $@ $add_dynamic_module
 exit 0

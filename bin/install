@@ -26,42 +26,33 @@ _apt() {
 }
 _install() {
 	_apt
-	dir=$ASDF_DIR/plugins/openresty/bin
+	dir=$PWD
 	dir1=$(echo $dir | sed 's/\//\\\//g')
 	local install_type=$1
 	local version=$2
 	version1=$(echo $version | sed 's/^v//')
 	local install_path=$3
+	tmpd=$(mktemp -d)
+	dir=$ASDF_DIR/plugins/openresty/bin
 
 	DISTRO=${DISTRO:-bionic}
 	echo $DIRTRO
-	wget --no-check-certificate https://raw.githubusercontent.com/openresty/docker-openresty/master/$DISTRO/Dockerfile -O /tmp/Dockerfile
-	myinstall=/tmp/myinstall.sh
-	sh $dir/docker2sh.sh /tmp/Dockerfile $myinstall
-	sed "/export RESTY_VERSION/a export RESTY_VERSION=$version1" -i $myinstall
-	sed 's/openresty\/pcre//g' -i $myinstall
-	sed 's/openresty\/openssl//g' -i $myinstall
-	sed 's/rm -rf/echo rm -rf/g' -i $myinstall
-	sed 's/ln -sf/echo ln -sf/g' -i $myinstall
+	cd $tmpd
+	wget --no-check-certificate https://raw.githubusercontent.com/openresty/docker-openresty/master/$DISTRO/Dockerfile -O Dockerfile
+	sh $dir/docker2sh.sh Dockerfile myinstall.sh
+	sed "/export RESTY_VERSION/a export RESTY_VERSION=$version1" -i myinstall.sh
+	sed 's/openresty\/pcre//g' -i myinstall.sh
+	sed 's/openresty\/openssl//g' -i myinstall.sh
+	sed 's/rm -rf/echo rm -rf/g' -i myinstall.sh
+	sed 's/ln -sf/echo ln -sf/g' -i myinstall.sh
 
-	echo sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i $myinstall
-	sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i $myinstall
+	echo sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i myinstall.sh
+	sed "s/eval .\/configure/bash -x $dir1\/modules.sh $version1/g" -i myinstall.sh
 
-	bash -x $myinstall
-	mkdir -p $install_path/bin $install_path/lib $install_path/include
-
-	cp -rf /usr/local/openresty $install_path/
-	cp -rf /usr/local/include/pcre* /usr/local/include/openssl* $install_path/include/
-	cp -rf /usr/local/bin/pcre* /usr/local/bin/c_* /usr/local/bin/openssl* $install_path/bin/
-	cp -rf /usr/local/lib/pkgconfig /usr/local/lib/engine* /usr/local/lib/libssl* /usr/local/lib/libcrypto* /usr/local/lib/libpcre* $install_path/lib/
-	echo "$install_path/lib" >/etc/ld.so.conf.d/0openresty.conf
-	rm -rf /usr/local/share
-	n1=$(find $install_path | wc -l)
-	n2=$(find /usr/local | wc -l)
-	if [ $n1 -eq $n2 ]; then
-		echo "Install successful."
-	fi
-
+	cat myinstall.sh
+	bash -x myinstall.sh
+	mv /usr/local/* $install_path/
+	rm -rf $tmpd
 }
 
 _install $ASDF_INSTALL_TYPE $ASDF_INSTALL_VERSION $ASDF_INSTALL_PATH
