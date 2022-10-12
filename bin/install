@@ -26,14 +26,16 @@ _apt() {
 }
 _install() {
 	_apt
-	dir=$PWD
-	dir1=$(echo $dir | sed 's/\//\\\//g')
+	#	dir=$PWD
+	#	dir1=$(echo $dir | sed 's/\//\\\//g')
 	local install_type=$1
 	local version=$2
 	version1=$(echo $version | sed 's/^v//')
 	local install_path=$3
 	tmpd=$(mktemp -d)
 	dir=$ASDF_DIR/plugins/openresty/bin
+
+	dir1=$(echo $dir | sed 's/\//\\\//g')
 
 	DISTRO=${DISTRO:-bionic}
 	echo $DIRTRO
